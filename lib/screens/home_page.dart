@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
+import 'competency_profile_page.dart';
 
 class HomePage extends StatelessWidget {
   final String name = "Guest"; // Đổi tên người dùng ở đây
@@ -56,6 +57,19 @@ class HomePage extends StatelessWidget {
             color: Colors.orange,
           ),
           _buildSmallCard(
+            icon: Icons.folder_shared,
+            title: 'Quản lý hồ sơ\nnăng lực',
+            color: Colors.brown,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CompetencyProfilePage(),
+                ),
+              );
+            },
+          ),
+          _buildSmallCard(
             icon: Icons.school,
             title: 'Đào tạo và\nphát triển',
             color: Colors.purple,
@@ -75,32 +89,35 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSmallCard({required IconData icon, required String title, required Color color}) {
+  Widget _buildSmallCard({required IconData icon, required String title, required Color color, VoidCallback? onTap}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 50,
-              color: color, // Màu sắc của biểu tượng
-            ),
-            SizedBox(height: 10),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold), // Màu sắc của tiêu đề
-            ),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                icon,
+                size: 50,
+                color: color, // Màu sắc của biểu tượng
+              ),
+              SizedBox(height: 10),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold), // Màu sắc của tiêu đề
+              ),
+            ],
+          ),
         ),
       ),
     );

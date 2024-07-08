@@ -3,8 +3,12 @@ import 'package:employee_manager/utils/constants.dart';
 import 'employee_detail_page.dart';
 import 'add_employee_page.dart';
 
-class EmployeeListPage extends StatelessWidget {
-  // Dữ liệu mẫu cho danh sách nhân viên
+class EmployeeListPage extends StatefulWidget {
+  @override
+  _EmployeeListPageState createState() => _EmployeeListPageState();
+}
+
+class _EmployeeListPageState extends State<EmployeeListPage> {
   final List<Map<String, String>> employees = [
     {
       'name': 'John Doe',
@@ -48,53 +52,91 @@ class EmployeeListPage extends StatelessWidget {
     },
   ];
 
+  List<Map<String, String>> filteredEmployees = [];
+
+  String searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    filteredEmployees = employees; // Khởi tạo biến filteredEmployees với employees
+  }
+
+  void updateSearchQuery(String newQuery) {
+    setState(() {
+      searchQuery = newQuery;
+      filteredEmployees = employees.where((employee) {
+        return employee['name']!
+            .toLowerCase()
+            .contains(newQuery.toLowerCase());
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Center(
-            child: const Text('Danh sách nhân viên',
-              style: TextStyle(
-                color: Colors.white, // Màu chữ của tiêu đề
-              ),
+        title: const Center(
+          child: Text(
+            'Danh sách nhân viên',
+            style: TextStyle(
+              color: Colors.white,
             ),
+          ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: employees.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            child: ListTile(
-              title: Text(employees[index]['name']!),
-              subtitle: Text(employees[index]['position']!),
-              leading: CircleAvatar(
-                child: Text(
-                  employees[index]['name']![0],
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.blue, // Thay đổi màu sắc nếu cần
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Tìm kiếm nhân viên',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
               ),
-              onTap: () {
-                // Chuyển đến trang chi tiết nhân viên
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EmployeeDetailPage(employee: employees[index]),
+              onChanged: (query) => updateSearchQuery(query),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredEmployees.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  child: ListTile(
+                    title: Text(filteredEmployees[index]['name']!),
+                    subtitle: Text(filteredEmployees[index]['position']!),
+                    leading: CircleAvatar(
+                      child: Text(
+                        filteredEmployees[index]['name']![0],
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.blue,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EmployeeDetailPage(
+                              employee: filteredEmployees[index]),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
             ),
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Chuyển đến màn hình thêm mới nhân viên
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddEmployeePage(), // Thay thế bằng màn hình thêm mới của bạn
+              builder: (context) => AddEmployeePage(),
             ),
           );
         },
