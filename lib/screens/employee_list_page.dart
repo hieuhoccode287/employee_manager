@@ -27,6 +27,14 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
       'address': '456 Đường Phong, Thành phố, Quốc gia'
     },
     {
+      'name': 'Kana Mouth',
+      'position': 'Quản lý Sản phẩm',
+      'department': 'Quản lý Sản phẩm',
+      'email': 'jane.smith@example.com',
+      'phone': '+1 (234) 567-8901',
+      'address': '456 Đường Phong, Thành phố, Quốc gia'
+    },
+    {
       'name': 'Michael Brown',
       'position': 'Thiết kế UI/UX',
       'department': 'Thiết kế',
@@ -53,8 +61,8 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   ];
 
   List<Map<String, String>> filteredEmployees = [];
-
   String searchQuery = '';
+  String selectedDepartment = 'Tất cả';
 
   @override
   void initState() {
@@ -65,12 +73,26 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   void updateSearchQuery(String newQuery) {
     setState(() {
       searchQuery = newQuery;
-      filteredEmployees = employees.where((employee) {
-        return employee['name']!
-            .toLowerCase()
-            .contains(newQuery.toLowerCase());
-      }).toList();
+      filterEmployees();
     });
+  }
+
+  void updateSelectedDepartment(String? newDepartment) {
+    setState(() {
+      selectedDepartment = newDepartment!;
+      filterEmployees();
+    });
+  }
+
+  void filterEmployees() {
+    filteredEmployees = employees.where((employee) {
+      final matchesSearchQuery = employee['name']!
+          .toLowerCase()
+          .contains(searchQuery.toLowerCase());
+      final matchesDepartment = selectedDepartment == 'Tất cả' ||
+          employee['department'] == selectedDepartment;
+      return matchesSearchQuery && matchesDepartment;
+    }).toList();
   }
 
   @override
@@ -91,13 +113,41 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: 'Tìm kiếm nhân viên',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (query) => updateSearchQuery(query),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Tìm kiếm nhân viên',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (query) => updateSearchQuery(query),
+                  ),
+                ),
+                SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.filter_list),
+                  onSelected: (value) {
+                    updateSelectedDepartment(value);
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return <String>[
+                      'Tất cả',
+                      'Kỹ thuật',
+                      'Quản lý Sản phẩm',
+                      'Thiết kế',
+                      'Dữ liệu',
+                      'Đảm bảo chất lượng'
+                    ].map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
+                ),
+              ],
             ),
           ),
           Expanded(

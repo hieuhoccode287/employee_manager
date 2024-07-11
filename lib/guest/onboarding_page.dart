@@ -13,7 +13,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   List<Map<String, String>> slides = [
     {
       'image': 'assets/img_qlnv1.png',
-      'title': 'Chào mừng đến với Quản lý nhân viên ',
+      'title': 'Chào mừng đến với Quản lý Nhân Viên ',
       'subtitle': 'Ứng dụng quản lý thông tin nhân viên một cách dễ dàng và hiệu quả.',
     },
     {

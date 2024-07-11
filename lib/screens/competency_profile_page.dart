@@ -6,7 +6,12 @@ class CompetencyProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quản lý hồ sơ năng lực'),
+        title: Text('Quản lý hồ sơ năng lực',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // Color of the back button
         backgroundColor: primaryColor,
       ),
       body: Center(
