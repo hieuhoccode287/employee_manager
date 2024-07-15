@@ -148,7 +148,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         prefixIcon: Icon(Icons.business),
         border: OutlineInputBorder(),
       ),
-      items: ['Kỹ thuật', 'Quản lý', 'Thiết kế', 'Dữ liệu', 'Đảm bảo chất lượng']
+      items: ['Kỹ thuật', 'Quản lý sản phẩm', 'Thiết kế', 'Dữ liệu', 'Đảm bảo chất lượng']
           .map((dept) => DropdownMenuItem<String>(
         value: dept,
         child: Text(dept),

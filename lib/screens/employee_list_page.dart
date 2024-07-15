@@ -20,16 +20,16 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     },
     {
       'name': 'Jane Smith',
-      'position': 'Quản lý Sản phẩm',
-      'department': 'Quản lý Sản phẩm',
+      'position': 'Quản lý sản phẩm',
+      'department': 'Quản lý sản phẩm',
       'email': 'jane.smith@example.com',
       'phone': '+1 (234) 567-8901',
       'address': '456 Đường Phong, Thành phố, Quốc gia'
     },
     {
       'name': 'Kana Mouth',
-      'position': 'Quản lý Sản phẩm',
-      'department': 'Quản lý Sản phẩm',
+      'position': 'Quản lý sản phẩm',
+      'department': 'Quản lý sản phẩm',
       'email': 'jane.smith@example.com',
       'phone': '+1 (234) 567-8901',
       'address': '456 Đường Phong, Thành phố, Quốc gia'
