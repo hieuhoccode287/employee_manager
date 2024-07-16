@@ -30,7 +30,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
       'name': 'Kana Mouth',
       'position': 'Quản lý sản phẩm',
       'department': 'Quản lý sản phẩm',
-      'email': 'jane.smith@example.com',
+      'email': 'kana.mouth@example.com',
       'phone': '+1 (234) 567-8901',
       'address': '456 Đường Phong, Thành phố, Quốc gia'
     },
@@ -67,7 +67,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   @override
   void initState() {
     super.initState();
-    filteredEmployees = employees; // Khởi tạo biến filteredEmployees với employees
+    filteredEmployees = employees; // Initialize filteredEmployees with all employees
   }
 
   void updateSearchQuery(String newQuery) {
@@ -85,14 +85,16 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   }
 
   void filterEmployees() {
-    filteredEmployees = employees.where((employee) {
-      final matchesSearchQuery = employee['name']!
-          .toLowerCase()
-          .contains(searchQuery.toLowerCase());
-      final matchesDepartment = selectedDepartment == 'Tất cả' ||
-          employee['department'] == selectedDepartment;
-      return matchesSearchQuery && matchesDepartment;
-    }).toList();
+    setState(() {
+      filteredEmployees = employees.where((employee) {
+        final matchesSearchQuery = employee['name']!
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase());
+        final matchesDepartment = selectedDepartment == 'Tất cả' ||
+            employee['department'] == selectedDepartment;
+        return matchesSearchQuery && matchesDepartment;
+      }).toList();
+    });
   }
 
   @override
@@ -100,12 +102,10 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Center(
-          child: Text(
-            'Danh sách nhân viên',
-            style: TextStyle(
-              color: Colors.white,
-            ),
+        title: const Text(
+          'Danh sách nhân viên',
+          style: TextStyle(
+            color: Colors.white,
           ),
         ),
       ),
@@ -135,7 +135,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
                     return <String>[
                       'Tất cả',
                       'Kỹ thuật',
-                      'Quản lý Sản phẩm',
+                      'Quản lý sản phẩm',
                       'Thiết kế',
                       'Dữ liệu',
                       'Đảm bảo chất lượng'

@@ -1,13 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
-import 'package:employee_manager/api/api_service.dart'; // Import the ApiService
+import 'package:employee_manager/screens/performance_management_page.dart'; // Import PerformanceManagementPage
+import 'package:employee_manager/api/api_service.dart';
 import 'competency_profile_page.dart';
 
 class HomePage extends StatefulWidget {
-  final String email; // Declare the email as final
+  final String email;
 
-  // Constructor for HomePage
   HomePage({required this.email});
 
   @override
@@ -15,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String name = ""; // Initial placeholder
+  String name = "";
 
   @override
   void initState() {
@@ -50,7 +49,7 @@ class _HomePageState extends State<HomePage> {
             Text(
               ' Xin chào, $name!',
               style: TextStyle(
-                color: Colors.white, // Màu chữ của tiêu đề
+                color: Colors.white,
               ),
             ),
           ],
@@ -60,7 +59,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.settings),
             color: Colors.white,
             onPressed: () {
-              // TODO: Navigate to settings screen
+              // Handle settings button press
             },
           ),
         ],
@@ -75,16 +74,22 @@ class _HomePageState extends State<HomePage> {
             icon: Icons.access_time,
             title: 'Theo dõi thời gian\nvà điểm danh',
             color: Colors.blue,
-          ),
-          _buildSmallCard(
-            icon: Icons.people,
-            title: 'Tuyển dụng và\ntheo dõi ứng viên',
-            color: Colors.green,
+            onTap: () {
+              // Navigate to time tracking page
+            },
           ),
           _buildSmallCard(
             icon: Icons.trending_up,
             title: 'Quản lý\nhiệu suất',
             color: Colors.orange,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PerformanceManagementPage(),
+                ),
+              );
+            },
           ),
           _buildSmallCard(
             icon: Icons.folder_shared,
@@ -103,16 +108,25 @@ class _HomePageState extends State<HomePage> {
             icon: Icons.school,
             title: 'Đào tạo và\nphát triển',
             color: Colors.purple,
+            onTap: () {
+              // Navigate to training and development page
+            },
           ),
           _buildSmallCard(
             icon: Icons.attach_money,
             title: 'Quản lý tiền lương\nvà phúc lợi',
             color: Colors.red,
+            onTap: () {
+              // Navigate to salary and benefits management page
+            },
           ),
           _buildSmallCard(
             icon: Icons.insert_chart,
             title: 'Phân tích và\nbáo cáo',
             color: Colors.teal,
+            onTap: () {
+              // Navigate to analysis and reporting page
+            },
           ),
         ],
       ),
@@ -138,13 +152,13 @@ class _HomePageState extends State<HomePage> {
               Icon(
                 icon,
                 size: 50,
-                color: color, // Màu sắc của biểu tượng
+                color: color,
               ),
               SizedBox(height: 10),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold), // Màu sắc của tiêu đề
+                style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
