@@ -1,5 +1,7 @@
+import 'package:employee_manager/guest/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -8,11 +10,12 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: Center(
-            child: const Text('Cài đặt',
-              style: TextStyle(
-                color: Colors.white, // Màu chữ của tiêu đề
-              ),
-            )
+          child: const Text(
+            'Cài đặt',
+            style: TextStyle(
+              color: Colors.white, // Màu chữ của tiêu đề
+            ),
+          ),
         ),
       ),
       body: ListView(
@@ -51,11 +54,32 @@ class SettingsPage extends StatelessWidget {
             title: Text('Đăng xuất'),
             leading: Icon(Icons.exit_to_app, color: Colors.red), // Thay đổi màu của biểu tượng
             onTap: () {
-              // TODO: Implement logout functionality
+              _handleLogout(context);
             },
           ),
         ],
       ),
+    );
+  }
+
+  void _handleLogout(BuildContext context) async {
+    // Clear login state
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isLoggedIn');
+
+    // Show logout success Snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Đăng xuất thành công!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Navigate back to login screen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+          (Route<dynamic> route) => false, // Prevent going back to settings page
     );
   }
 }

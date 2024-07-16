@@ -1,7 +1,6 @@
-import 'package:employee_manager/main.dart';
-import 'package:employee_manager/navigation/navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:employee_manager/utils/constants.dart';
+import 'package:employee_manager/navigation/navigation_bar.dart';
+import 'package:employee_manager/api/api_service.dart'; // Import the ApiService
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,62 +8,67 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     // Load default username and password (for demo purposes)
-    _usernameController.text = 'user1@gmail.com';
+    _usernameController.text = 'hieu123@gmail.com';
     _passwordController.text = '123456';
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            FlutterLogo(size: 100),
-            SizedBox(height: 20),
-            _buildInputField('Email/Username', controller: _usernameController),
-            SizedBox(height: 20),
-            _buildInputField('Mật khẩu', isPassword: true, controller: _passwordController),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _handleLogin(context);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 100.0), // Add your desired horizontal padding
-                child: Text('Đăng nhập'),
-              ),
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    // Add your onPressed logic here
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text('Quên mật khẩu?'),
-                  ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FlutterLogo(size: 100),
+              SizedBox(height: 20),
+              _buildInputField('Email/Username', controller: _usernameController),
+              SizedBox(height: 20),
+              _buildInputField('Mật khẩu', isPassword: true, controller: _passwordController),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _handleLogin(context);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 100.0),
+                  child: Text('Đăng nhập'),
                 ),
-              ],
-            ),
-
-            // SizedBox(height: 10),
-            // TextButton(
-            //   onPressed: () {
-            //   },
-            //   child: Text('Đăng ký'),
-            // ),
-          ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      // Add your onPressed logic here
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Text('Quên mật khẩu?'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -73,23 +77,38 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildInputField(String label, {bool isPassword = false, TextEditingController? controller}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         obscureText: isPassword,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: label,
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '$label không được để trống';
+          }
+          return null;
+        },
       ),
     );
   }
 
   void _handleLogin(BuildContext context) async {
-    String username = _usernameController.text.trim();
-    String password = _passwordController.text.trim();
+    String email = _usernameController.text.trim();
+    String matkhau = _passwordController.text.trim();
 
-    // Replace this with your actual authentication logic
-    if (username == 'user1@gmail.com' && password == '123456') {
+    final response = await ApiService.login(email, matkhau);
+
+    if (response['success']) {
+      // Show success Snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đăng nhập thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
       // Navigate to Home Page
       Navigator.pushReplacement(
         context,
@@ -97,24 +116,28 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       // Show error dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Đăng nhập không thành công'),
-            content: Text('Sai tên đăng nhập hoặc mật khẩu.'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Đóng'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+      _showErrorDialog(context, 'Đăng nhập không thành công', response['message']);
     }
+  }
+
+  void _showErrorDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Đóng'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
