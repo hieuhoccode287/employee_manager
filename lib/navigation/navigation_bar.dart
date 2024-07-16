@@ -5,7 +5,9 @@ import 'package:employee_manager/screens/notifications_page.dart';
 import 'package:employee_manager/screens/settings_page.dart';
 
 class NavigationExample extends StatefulWidget {
-  const NavigationExample({super.key});
+  final String email;
+
+  const NavigationExample({super.key, required this.email});
 
   @override
   State<NavigationExample> createState() => _NavigationExampleState();
@@ -14,15 +16,15 @@ class NavigationExample extends StatefulWidget {
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
 
-  final List<Widget> _pages = [
-    HomePage(),
-    EmployeeListPage(),
-    NotificationsPage(),
-    SettingsPage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      HomePage(email: widget.email), // Use widget.email here
+      EmployeeListPage(),
+      NotificationsPage(),
+      SettingsPage(),
+    ];
+
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         height: 70,

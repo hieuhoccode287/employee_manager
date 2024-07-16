@@ -112,7 +112,9 @@ class _LoginPageState extends State<LoginPage> {
       // Navigate to Home Page
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => NavigationExample()),
+        MaterialPageRoute(
+          builder: (context) => NavigationExample(email: email), // Pass the email to NavigationExample
+        ),
       );
     } else {
       // Show error dialog
