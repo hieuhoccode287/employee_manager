@@ -12,7 +12,7 @@ class EmployeeDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           employee['name'] ?? 'Chi tiết Nhân viên',
-            style: TextStyle(
+          style: TextStyle(
             color: Colors.white, // Text color of the title
           ),
         ),
@@ -68,10 +68,8 @@ class EmployeeDetailPage extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.blue,
-                        child: Text(
-                          employee['name']![0],
-                          style: TextStyle(fontSize: 36, color: Colors.white),
-                        ),
+                        backgroundImage: _buildAvatarImage(),
+                        child: _buildAvatarPlaceholder(),
                       ),
                     ),
                     SizedBox(height: 16),
@@ -147,6 +145,26 @@ class EmployeeDetailPage extends StatelessWidget {
       ),
     );
   }
+
+  ImageProvider _buildAvatarImage() {
+    if (employee['url'] != null && employee['url']!.isNotEmpty) {
+      return NetworkImage(employee['url']!);
+    } else {
+      return AssetImage('assets/placeholder.png'); // Placeholder image
+    }
+  }
+
+  Widget _buildAvatarPlaceholder() {
+    if (employee['url'] != null && employee['url']!.isNotEmpty) {
+      return Container(); // Or any other valid Widget
+    } else {
+      return Text(
+        employee['name']![0],
+        style: TextStyle(color: Colors.white, fontSize: 30),
+      );
+    }
+  }
+
 
   void _editEmployee(BuildContext context) {
     // Xử lý khi người dùng chọn Sửa
