@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
 import 'employee_detail_page.dart';
 import 'add_employee_page.dart';
+import 'package:employee_manager/api/api_service.dart'; // Import ApiService
 
 class EmployeeListPage extends StatefulWidget {
   @override
@@ -9,65 +10,41 @@ class EmployeeListPage extends StatefulWidget {
 }
 
 class _EmployeeListPageState extends State<EmployeeListPage> {
-  final List<Map<String, String>> employees = [
-    {
-      'name': 'John Doe',
-      'position': 'Kỹ sư phần mềm',
-      'department': 'Kỹ thuật',
-      'email': 'john.doe@example.com',
-      'phone': '+1 (123) 456-7890',
-      'address': '123 Đường Chính, Thành phố, Quốc gia'
-    },
-    {
-      'name': 'Jane Smith',
-      'position': 'Quản lý sản phẩm',
-      'department': 'Quản lý sản phẩm',
-      'email': 'jane.smith@example.com',
-      'phone': '+1 (234) 567-8901',
-      'address': '456 Đường Phong, Thành phố, Quốc gia'
-    },
-    {
-      'name': 'Kana Mouth',
-      'position': 'Quản lý sản phẩm',
-      'department': 'Quản lý sản phẩm',
-      'email': 'kana.mouth@example.com',
-      'phone': '+1 (234) 567-8901',
-      'address': '456 Đường Phong, Thành phố, Quốc gia'
-    },
-    {
-      'name': 'Michael Brown',
-      'position': 'Thiết kế UI/UX',
-      'department': 'Thiết kế',
-      'email': 'michael.brown@example.com',
-      'phone': '+1 (345) 678-9012',
-      'address': '789 Đường Sồi, Thành phố, Quốc gia'
-    },
-    {
-      'name': 'Emily Davis',
-      'position': 'Chuyên viên Phân tích dữ liệu',
-      'department': 'Dữ liệu',
-      'email': 'emily.davis@example.com',
-      'phone': '+1 (456) 789-0123',
-      'address': '012 Đường Thông, Thành phố, Quốc gia'
-    },
-    {
-      'name': 'Chris Wilson',
-      'position': 'Đảm bảo chất lượng',
-      'department': 'Đảm bảo chất lượng',
-      'email': 'chris.wilson@example.com',
-      'phone': '+1 (567) 890-1234',
-      'address': '345 Đường Phong, Thành phố, Quốc gia'
-    },
-  ];
-
   List<Map<String, String>> filteredEmployees = [];
   String searchQuery = '';
-  String selectedDepartment = 'Tất cả';
+  int? selectedDepartmentMapb; // Updated to int type for department ID filtering
 
   @override
   void initState() {
     super.initState();
-    filteredEmployees = employees; // Initialize filteredEmployees with all employees
+    fetchEmployeesFromApi(); // Load employees from API on initialization
+  }
+
+  // Method to fetch employees from API
+  void fetchEmployeesFromApi() async {
+    try {
+      List<dynamic> employees = await ApiService.fetchEmployees();
+      setState(() {
+        filteredEmployees = employees.map((employee) {
+          // Handle null values gracefully
+          return {
+            'name': employee['tennv'] != null ? employee['tennv'] as String : '',
+            'position': employee['chucvu'] != null ? employee['chucvu'] as String : '',
+            'department': employee['tenpb'] != null ? employee['tenpb'] as String : '',
+            'iddepartment': employee['mapb'] != null ? employee['mapb'].toString() : '',
+            'email': employee['email'] != null ? employee['email'] as String : '',
+            'phone': employee['sdt'] != null ? employee['sdt'].toString() : '',
+            'address': employee['diachi'] != null ? employee['diachi'] as String : '',
+          };
+        }).toList();
+
+        // Set original employees for filtering
+        _originalEmployees = List<Map<String, String>>.from(filteredEmployees);
+      });
+    } catch (e) {
+      print('Error fetching employees: $e');
+      // Handle error loading employees from API
+    }
   }
 
   void updateSearchQuery(String newQuery) {
@@ -77,21 +54,24 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     });
   }
 
-  void updateSelectedDepartment(String? newDepartment) {
+  void updateSelectedDepartment(int? newDepartmentMapb) {
     setState(() {
-      selectedDepartment = newDepartment!;
+      selectedDepartmentMapb = newDepartmentMapb;
       filterEmployees();
     });
   }
 
+  List<Map<String, String>> _originalEmployees = []; // Define _originalEmployees as a class member
+
   void filterEmployees() {
     setState(() {
-      filteredEmployees = employees.where((employee) {
+      filteredEmployees = _originalEmployees.where((employee) {
         final matchesSearchQuery = employee['name']!
             .toLowerCase()
             .contains(searchQuery.toLowerCase());
-        final matchesDepartment = selectedDepartment == 'Tất cả' ||
-            employee['department'] == selectedDepartment;
+        final matchesDepartment = selectedDepartmentMapb == null ||
+            (selectedDepartmentMapb == 0 || // Handle 'Tất cả' case where value is null or 0
+                employee['iddepartment'] == selectedDepartmentMapb.toString());
         return matchesSearchQuery && matchesDepartment;
       }).toList();
     });
@@ -126,23 +106,24 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
                   ),
                 ),
                 SizedBox(width: 8),
-                PopupMenuButton<String>(
+                PopupMenuButton<int>(
                   icon: Icon(Icons.filter_list),
-                  onSelected: (value) {
+                  onSelected: (int? value) {
                     updateSelectedDepartment(value);
                   },
                   itemBuilder: (BuildContext context) {
-                    return <String>[
-                      'Tất cả',
-                      'Kỹ thuật',
-                      'Quản lý sản phẩm',
-                      'Thiết kế',
-                      'Dữ liệu',
-                      'Đảm bảo chất lượng'
-                    ].map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
+                    return [
+                      {'label': 'Tất cả', 'value': 0},
+                      {'label': 'Phòng Nhân sự', 'value': 1},
+                      {'label': 'Phòng Marketing', 'value': 2},
+                      {'label': 'Phòng Kế toán - Tài chính', 'value': 3},
+                      {'label': 'Phòng Hành chính', 'value': 4},
+                      {'label': 'Phòng Kỹ thuật', 'value': 5},
+                      {'label': 'Phòng Đảm bảo chất lượng', 'value': 6},
+                    ].map((item) {
+                      return PopupMenuItem<int>(
+                        value: item['value'] as int?,
+                        child: Text(item['label'] as String),
                       );
                     }).toList();
                   },
@@ -170,7 +151,8 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => EmployeeDetailPage(
-                              employee: filteredEmployees[index]),
+                            employee: filteredEmployees[index],
+                          ),
                         ),
                       );
                     },

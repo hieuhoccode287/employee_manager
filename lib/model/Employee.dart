@@ -5,8 +5,6 @@ class Employee {
   final String email;
   final String phone;
   final String address;
-  final List<Competency> competencies;
-
   Employee({
     required this.name,
     required this.position,
@@ -14,16 +12,6 @@ class Employee {
     required this.email,
     required this.phone,
     required this.address,
-    required this.competencies,
   });
 }
 
-class Competency {
-  final String name;
-  int level;
-
-  Competency({
-    required this.name,
-    required this.level,
-  });
-}
