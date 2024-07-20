@@ -8,7 +8,11 @@ class ApiService {
   static const String _userInfoEndpoint = '/user_info';
   static const String _employeesEndpoint = '/employees'; // Endpoint to fetch employees
   static const String _addEmployeeEndpoint = '/employees/add'; // Endpoint to add employee
+  static const String _employeeDetailsEndpoint = '/employees/details'; // Endpoint to fetch employee details
+  static const String _updateEmployeeEndpoint = '/employees/update'; // Endpoint to update employee
+  static const String _deleteEmployeeEndpoint = '/employees'; // Endpoint to delete employee
   static const String _uploadEndpoint = '/upload';
+  static const String _departmentsEndpoint = '/departments'; // Endpoint to fetch departments
 
   static Future<Map<String, dynamic>> login(String email, String matkhau) async {
     final String url = '$_baseUrl$_loginEndpoint';
@@ -115,6 +119,74 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> fetchEmployeeDetails(int employeeId) async {
+    final String url = '$_baseUrl$_employeeDetailsEndpoint/$employeeId';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to load employee details');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to load employee details');
+    }
+  }
+
+
+
+  static Future<Map<String, dynamic>> updateEmployee(Map<String, dynamic> updatedEmployee) async {
+    final int employeeId = updatedEmployee['id'];
+    final String url = '$_baseUrl$_updateEmployeeEndpoint/$employeeId';
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(updatedEmployee),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to update employee: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to update employee');
+    }
+  }
+
+
+
+  static Future<Map<String, dynamic>> deleteEmployee(int employeeId) async {
+    final String url = '$_baseUrl$_deleteEmployeeEndpoint/$employeeId';
+    try {
+      // Gửi yêu cầu HTTP DELETE tới API
+      var response = await http.delete(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      // Xử lý phản hồi từ API
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to delete employee');
+      }
+    } catch (e) {
+      print('Error deleting employee: $e');
+      throw Exception('Failed to delete employee');
+    }
+  }
+
   static Future<String> uploadImage(File imageFile) async {
     try {
       final String url = '$_baseUrl$_uploadEndpoint';
@@ -138,7 +210,29 @@ class ApiService {
     }
   }
 
+  static String getImageUrl(String filename) {
+    return '$_baseUrl$filename';
+  }
 
 
+  static Future<List<Map<String, dynamic>>> fetchDepartments() async {
+    final String url = '$_baseUrl$_departmentsEndpoint';
 
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((dept) => {
+          'mapb': dept['mapb'],
+          'tenpb': dept['tenpb']
+        }).toList();
+      } else {
+        throw Exception('Failed to load departments');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to load departments');
+    }
+  }
 }

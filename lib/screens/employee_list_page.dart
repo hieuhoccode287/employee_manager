@@ -18,7 +18,11 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   @override
   void initState() {
     super.initState();
-    fetchEmployeesFromApi(); // Load employees from API on initialization
+    fetchEmployeesFromApi();
+  }
+
+  void _refreshEmployeeList() {
+    fetchEmployeesFromApi();
   }
 
   void fetchEmployeesFromApi() async {
@@ -29,10 +33,8 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
           String avatarUrl = employee['avatar_url'] != null && employee['avatar_url'].isNotEmpty
               ? 'http://192.168.1.5:3000${employee['avatar_url']}'
               : '';
-          // Log the URL for debugging
-          print('Avatar URL: $avatarUrl');
-
           return {
+            'id': employee['manv'] != null ? employee['manv'].toString() : '',
             'name': employee['tennv'] != null ? employee['tennv'] as String : '',
             'position': employee['chucvu'] != null ? employee['chucvu'] as String : '',
             'department': employee['tenpb'] != null ? employee['tenpb'] as String : '',
@@ -49,6 +51,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
       });
     } catch (e) {
       print('Error fetching employees: $e');
+      // Handle error (e.g., show error message, retry option)
     }
   }
 
@@ -144,39 +147,39 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
               itemCount: filteredEmployees.length,
               itemBuilder: (BuildContext context, int index) {
                 final avatarUrl = filteredEmployees[index]['url']!;
+                final name = filteredEmployees[index]['name']!;
+                final employeeId = int.tryParse(filteredEmployees[index]['id']!);
+
                 return Card(
                   child: ListTile(
-                    title: Text(filteredEmployees[index]['name']!),
+                    title: Text(name),
                     subtitle: Text(filteredEmployees[index]['position']!),
                     leading: CircleAvatar(
                       backgroundImage: avatarUrl.isNotEmpty
                           ? NetworkImage(avatarUrl)
-                          : AssetImage('assets/placeholder.png'), // Placeholder image
+                          : NetworkImage('https://ui-avatars.com/api/?name=$name&size=128'),
                       onBackgroundImageError: (_, __) {
-                        // Defer the setState to a safe point using addPostFrameCallback
                         WidgetsBinding.instance!.addPostFrameCallback((_) {
                           setState(() {
-                            // Do not reset the URL here, only mark as empty if needed
                             if (filteredEmployees[index]['url'] == avatarUrl) {
-                              filteredEmployees[index]['url'] = ''; // Remove broken URL
+                              filteredEmployees[index]['url'] = '';
                             }
                           });
                         });
                       },
-                      child: avatarUrl.isEmpty
-                          ? Text(
-                        filteredEmployees[index]['name']![0],
-                        style: TextStyle(color: Colors.white),
-                      )
-                          : null,
-                      backgroundColor: Colors.blue,
                     ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => EmployeeDetailPage(
-                            employee: filteredEmployees[index],
+                            employeeId: employeeId ?? 0,
+                            onDelete: () {
+                              _refreshEmployeeList();
+                            },
+                            onEdit: () {
+                              _refreshEmployeeList(); // Ensure it refreshes after returning
+                            },
                           ),
                         ),
                       );
@@ -198,7 +201,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
           );
 
           if (result == true) {
-            fetchEmployeesFromApi(); // Refresh the employee list
+            fetchEmployeesFromApi();
           }
         },
         child: Icon(Icons.add),

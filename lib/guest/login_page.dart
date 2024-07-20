@@ -101,11 +101,12 @@ class _LoginPageState extends State<LoginPage> {
     final response = await ApiService.login(email, matkhau);
 
     if (response['success']) {
-      // Show success Snackbar
+      // Show success Snackbar with duration
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đăng nhập thành công!'),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 1), // Set duration here
         ),
       );
 

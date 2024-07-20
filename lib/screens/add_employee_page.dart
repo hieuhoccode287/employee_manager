@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:employee_manager/utils/constants.dart';
@@ -52,25 +51,52 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             children: [
               _buildProfileImage(),
               SizedBox(height: 20.0),
-              _buildTextField('Họ và tên', _nameController, Icons.person),
+              _buildTextField('Họ và tên', _nameController, Icons.person,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Vui lòng nhập họ và tên';
+                    }
+                    if (value.length < 2) {
+                      return 'Họ và tên phải có ít nhất 2 kí tự';
+                    }
+                    return null;
+                  }),
               SizedBox(height: 16.0),
               _buildTextField('Chức vụ', _positionController, Icons.work),
               SizedBox(height: 16.0),
               _buildDepartmentDropdown(),
               SizedBox(height: 16.0),
-              _buildTextField('Email', _emailController, Icons.email, keyboardType: TextInputType.emailAddress),
+              _buildTextField('Email', _emailController, Icons.email, keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Vui lòng nhập email';
+                    }
+                    if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+                      return 'Email không hợp lệ';
+                    }
+                    return null;
+                  }),
               SizedBox(height: 16.0),
-              _buildTextField('Số điện thoại', _phoneController, Icons.phone, keyboardType: TextInputType.phone),
+              _buildTextField('Số điện thoại', _phoneController, Icons.phone, keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Vui lòng nhập số điện thoại';
+                    }
+                    if (!RegExp(r'^\d{10,11}$').hasMatch(value)) {
+                      return 'Số điện thoại phải có 10 hoặc 11 chữ số';
+                    }
+                    return null;
+                  }),
               SizedBox(height: 16.0),
               _buildTextField('Địa chỉ', _addressController, Icons.home, maxLines: 3),
-              SizedBox(height: 32.0),
+              SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _saveEmployee();
                   }
                 },
-                child: Text('Thêm nhân viên', style: TextStyle(fontSize: 18.0)),
+                child: Text('Thêm mới', style: TextStyle(fontSize: 18.0)),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
@@ -130,7 +156,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {TextInputType? keyboardType, int? maxLines}) {
+  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {TextInputType? keyboardType, int? maxLines, FormFieldValidator<String>? validator}) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -140,12 +166,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         prefixIcon: Icon(icon),
         border: OutlineInputBorder(),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Vui lòng nhập $label';
-        }
-        return null;
-      },
+      validator: validator,
     );
   }
 
@@ -181,6 +202,15 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     try {
       String? imageUrl;
       if (_image != null) {
+        // Validate image size (e.g., max 2MB)
+        final imageSize = await _image!.length();
+        if (imageSize > 2 * 1024 * 1024) { // 2MB
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Kích thước ảnh vượt quá 2MB')),
+          );
+          return;
+        }
+
         imageUrl = await ApiService.uploadImage(_image!);
       }
 

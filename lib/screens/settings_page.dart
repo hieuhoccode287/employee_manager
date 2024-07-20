@@ -72,6 +72,7 @@ class SettingsPage extends StatelessWidget {
       SnackBar(
         content: Text('Đăng xuất thành công!'),
         backgroundColor: Colors.green,
+        duration: Duration(seconds: 1), // Set duration here
       ),
     );
 
