@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:employee_manager/utils/constants.dart';
 import 'package:employee_manager/api/api_service.dart';
+import 'dart:math';
 
 class AddEmployeePage extends StatefulWidget {
   @override
@@ -198,40 +199,63 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     );
   }
 
+  int _generateUniqueId() {
+    return DateTime.now().millisecondsSinceEpoch ~/ 100000;
+  }
+
   void _saveEmployee() async {
     try {
       String? imageUrl;
+      int manl = _generateUniqueId();
       if (_image != null) {
-        // Validate image size (e.g., max 2MB)
         final imageSize = await _image!.length();
-        if (imageSize > 2 * 1024 * 1024) { // 2MB
+        if (imageSize > 2 * 1024 * 1024) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Kích thước ảnh vượt quá 2MB')),
           );
           return;
         }
-
         imageUrl = await ApiService.uploadImage(_image!);
       }
+
+      final phoneNumber = _phoneController.text.trim();
+      final parsedPhoneNumber = phoneNumber.isNotEmpty ? int.tryParse(phoneNumber) : null;
 
       final result = await ApiService.addEmployee(
         tennv: _nameController.text.trim(),
         chucvu: _positionController.text.trim(),
         mapb: _getDepartmentId(_selectedDepartment),
         email: _emailController.text.trim(),
-        sdt: int.tryParse(_phoneController.text.trim()),
+        sdt: parsedPhoneNumber,
         diachi: _addressController.text.trim(),
         avatarUrl: imageUrl ?? '',
+        manl: manl,
       );
 
       if (result['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Thêm nhân viên thành công')),
+        print('Employee added with manl: $manl');
+        final competencyResult = await ApiService.addCompetency(
+          manl: manl,
+          kynang: '', // Replace with actual skill
+          kinhnghiem: '', // Replace with actual experience
+          hocvan: '', // Replace with actual education
+          chungchi: '', // Replace with actual certification
+          duan: '', // Replace with actual project
         );
-        Navigator.pop(context, true); // Pass true to indicate success
+
+        if (competencyResult['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Thêm nhân viên thành công')),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(competencyResult['message'] ?? 'Đã xảy ra lỗi khi thêm năng lực')),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Đã xảy ra lỗi')),
+          SnackBar(content: Text(result['message'] ?? 'Đã xảy ra lỗi khi thêm nhân viên')),
         );
       }
     } catch (e) {
@@ -241,6 +265,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       print('Error adding employee: $e');
     }
   }
+
 
   int _getDepartmentId(String departmentName) {
     switch (departmentName) {

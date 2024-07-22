@@ -85,6 +85,7 @@ class ApiService {
     int? sdt,
     String? diachi,
     String? avatarUrl,
+    int? manl,
   }) async {
     final String url = '$_baseUrl$_addEmployeeEndpoint';
 
@@ -100,6 +101,7 @@ class ApiService {
           'sdt': sdt,
           'diachi': diachi,
           'avatar_url': avatarUrl,
+          'manl': manl,
         }),
       );
 
@@ -240,7 +242,14 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data as Map<String, dynamic>;
+        // Ensure you handle potential nulls in the data
+        return {
+          'kynang': data['kynang'] ?? '',
+          'kinhnghiem': data['kinhnghiem'] ?? '',
+          'hocvan': data['hocvan'] ?? '',
+          'chungchi': data['chungchi'] ?? '',
+          'duan': data['duan'] ?? '',
+        };
       } else {
         throw Exception('Failed to load competency');
       }
@@ -249,4 +258,107 @@ class ApiService {
       throw Exception('Failed to load competency');
     }
   }
+
+
+  static const String _updateCompetencyEndpoint = '/competencies/update'; // Endpoint to update competency
+  static Future<Map<String, dynamic>> updateCompetency(int manl, Map<String, dynamic> updatedCompetency) async {
+    final String url = '$_baseUrl$_updateCompetencyEndpoint/$manl';
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(updatedCompetency),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to update competency: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to update competency');
+    }
+  }
+
+  static const String _addCompetencyEndpoint = '/competencies/add'; // Endpoint to add competency
+
+  static Future<Map<String, dynamic>> addCompetency({
+    required int manl,
+    required String kynang,
+    required String kinhnghiem,
+    required String hocvan,
+    required String chungchi,
+    required String duan,
+  }) async {
+    final String url = '$_baseUrl$_addCompetencyEndpoint';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'manl': manl,
+          'kynang': kynang,
+          'kinhnghiem': kinhnghiem,
+          'hocvan': hocvan,
+          'chungchi': chungchi,
+          'duan': duan,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'],
+            'competency': responseData['competency'],
+          };
+        } else {
+          throw Exception(responseData['message'] ?? 'Failed to add competency');
+        }
+      } else {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        throw Exception(responseData['message'] ?? 'Failed to add competency');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to add competency');
+    }
+  }
+
+  static const String _deleteCompetencyEndpoint = '/competencies'; // Endpoint to delete competency
+  static Future<Map<String, dynamic>> deleteCompetency(int competencyId) async {
+    final String url = '$_baseUrl$_deleteCompetencyEndpoint/$competencyId';
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'],
+            'competency': responseData['competency'],
+          };
+        } else {
+          throw Exception(responseData['message'] ?? 'Failed to delete competency');
+        }
+      } else {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        throw Exception(responseData['message'] ?? 'Failed to delete competency');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to delete competency');
+    }
+  }
+
 }

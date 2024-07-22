@@ -269,20 +269,42 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
     try {
       print('Đang xóa nhân viên với ID: ${widget.employeeId}');
 
-      // Gọi API để xóa nhân viên
-      Map<String, dynamic> result = await ApiService.deleteEmployee(widget.employeeId);
+      // Fetch employee details to get the competencies
+      final employeeData = await ApiService.fetchEmployeeDetails(widget.employeeId);
 
-      // Xác nhận kết quả xóa từ server
-      if (result.containsKey('success') && result['success']) {
+      // Ensure competencies is a list
+      List<dynamic> competencies = employeeData['nangluc'] ?? [];
+
+      // Check if competencies is actually a list
+      if (competencies is! List) {
+        throw Exception('Dữ liệu năng lực không hợp lệ');
+      }
+
+      // Delete each competency and ensure they are successfully deleted
+      for (var competency in competencies) {
+        final manl = competency['manl']; // Assuming `manl` is the competency ID
+        final deleteResult = await ApiService.deleteCompetency(manl);
+
+        // Check if deletion was successful
+        if (!deleteResult['success']) {
+          throw Exception('Không thể xóa năng lực với ID: $manl. Lỗi: ${deleteResult['error']}');
+        }
+      }
+
+      // After deleting all competencies, delete the employee
+      final deleteEmployeeResult = await ApiService.deleteEmployee(widget.employeeId);
+
+      // Confirm deletion result from server
+      if (deleteEmployeeResult.containsKey('success') && deleteEmployeeResult['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Nhân viên đã được xóa thành công')),
         );
 
-        // Gọi lại hàm onDelete để làm mới danh sách nhân viên trong EmployeeListPage
+        // Call the onDelete callback to refresh employee list
         widget.onDelete();
 
-        // Quay trở lại trang trước hoặc thực hiện bất kỳ cập nhật nào cần thiết
-        Navigator.of(context).pop(); // Đóng trang EmployeeDetailPage
+        // Navigate back to the previous page or perform any necessary updates
+        Navigator.of(context).pop(); // Close the EmployeeDetailPage
       } else {
         throw Exception('Không thể xóa nhân viên');
       }
@@ -293,4 +315,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
       );
     }
   }
+
+
+
 }
