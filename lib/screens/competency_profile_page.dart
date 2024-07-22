@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
 import 'competency_profile_detail_page.dart';
-import 'add_competency_page.dart';
+import 'package:employee_manager/api/api_service.dart';
 
 class CompetencyProfilePage extends StatefulWidget {
   @override
@@ -9,48 +9,54 @@ class CompetencyProfilePage extends StatefulWidget {
 }
 
 class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
-  final List<Map<String, String>> employees = [
-    {
-      'name': 'John Doe',
-      'position': 'Kỹ sư phần mềm',
-      'department': 'Kỹ thuật',
-      'skills': 'Lập trình Flutter, Quản lý dự án',
-      'experience': '3 năm kinh nghiệm trong lĩnh vực phát triển phần mềm.',
-      'education': 'Cử nhân Khoa học Máy tính tại Đại học ABC',
-      'certifications': 'Chứng chỉ PMP, Chứng chỉ AWS',
-      'projects': 'Dự án A, Dự án B',
-    },
-    {
-      'name': 'Jane Smith',
-      'position': 'Quản lý sản phẩm',
-      'department': 'Quản lý sản phẩm',
-      'skills': 'Digital Marketing, Content Creation',
-      'experience': '2 năm kinh nghiệm trong lĩnh vực marketing.',
-      'education': 'Cử nhân Quản trị Kinh doanh tại Đại học XYZ',
-      'certifications': 'Chứng chỉ Google Analytics, Chứng chỉ SEO',
-      'projects': 'Dự án C, Dự án D',
-    },
-    {
-      'name': 'Emily Davis',
-      'position': 'Chuyên viên Phân tích dữ liệu',
-      'department': 'Dữ liệu',
-      'skills': 'Data Analysis, Python, SQL',
-      'experience': '2 years as Data Analyst at ABC Corporation',
-      'education': 'Master\'s in Data Science from DEF University',
-      'certifications': 'Certified Data Scientist, Certified Python Programmer',
-      'projects': 'Project E, Project F',
-    }
-    // Add more employee data as needed
-  ];
-
   List<Map<String, String>> filteredEmployees = [];
+  List<Map<String, String>> _originalEmployees = [];
   String searchQuery = '';
-  String selectedDepartment = 'Tất cả';
+  int? selectedDepartment;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    filteredEmployees = employees; // Initialize filteredEmployees with all employees
+    fetchEmployeesFromApi();
+  }
+
+  void fetchEmployeesFromApi() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      List<dynamic> employees = await ApiService.fetchEmployees(); // Use the same method as EmployeeListPage
+      setState(() {
+        _originalEmployees = employees.map((employee) {
+          String avatarUrl = employee['avatar_url'] != null && employee['avatar_url'].isNotEmpty
+              ? 'http://192.168.1.5:3000${employee['avatar_url']}'
+              : '';
+          return {
+            'id': employee['manv'] != null ? employee['manv'].toString() : '',
+            'name': employee['tennv'] != null ? employee['tennv'] as String : '',
+            'position': employee['chucvu'] != null ? employee['chucvu'] as String : '',
+            'department': employee['tenpb'] != null ? employee['tenpb'] as String : '',
+            'url': avatarUrl,
+            'iddepartment': employee['mapb'] != null ? employee['mapb'].toString() : '',
+            'email': employee['email'] != null ? employee['email'] as String : '',
+            'phone': employee['sdt'] != null ? employee['sdt'].toString() : '',
+            'address': employee['diachi'] != null ? employee['diachi'] as String : '',
+          };
+        }).toList();
+
+        // Initialize filteredEmployees with all employees initially
+        filteredEmployees = List<Map<String, String>>.from(_originalEmployees);
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching employees: $e');
+      // Handle error (e.g., show error message, retry option)
+    }
   }
 
   void updateSearchQuery(String newQuery) {
@@ -60,26 +66,29 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
     });
   }
 
-  void updateSelectedDepartment(String? newDepartment) {
+  void updateSelectedDepartment(int? newDepartment) {
     setState(() {
-      selectedDepartment = newDepartment!;
+      selectedDepartment = newDepartment;
       filterEmployees();
     });
   }
 
   void filterEmployees() {
-    filteredEmployees = employees.where((employee) {
-      final matchesSearchQuery = employee['name']!
-          .toLowerCase()
-          .contains(searchQuery.toLowerCase());
-      final matchesDepartment = selectedDepartment == 'Tất cả' ||
-          (employee['department'] != null &&
-              employee['department']!.toLowerCase() == selectedDepartment.toLowerCase());
-      return matchesSearchQuery && matchesDepartment;
-    }).toList();
+    setState(() {
+      filteredEmployees = _originalEmployees.where((employee) {
+        final matchesSearchQuery = employee['name']!
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase());
+
+        // Check if selectedDepartmentMapb is null or matches the employee's department
+        final matchesDepartment = selectedDepartment == null ||
+            selectedDepartment == 0 || // Handle case when "Tất cả" is selected
+            employee['iddepartment'] == selectedDepartment.toString();
+
+        return matchesSearchQuery && matchesDepartment;
+      }).toList();
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,23 +120,24 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
                   ),
                 ),
                 SizedBox(width: 8),
-                PopupMenuButton<String>(
+                PopupMenuButton<int>(
                   icon: Icon(Icons.filter_list),
-                  onSelected: (value) {
+                  onSelected: (int? value) {
                     updateSelectedDepartment(value);
                   },
                   itemBuilder: (BuildContext context) {
-                    return <String>[
-                      'Tất cả',
-                      'Kỹ thuật',
-                      'Quản lý sản phẩm',
-                      'Thiết kế',
-                      'Dữ liệu',
-                      'Đảm bảo chất lượng'
-                    ].map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
+                    return [
+                      {'label': 'Tất cả', 'value': 0},
+                      {'label': 'Phòng Nhân sự', 'value': 1},
+                      {'label': 'Phòng Marketing', 'value': 2},
+                      {'label': 'Phòng Kế toán - Tài chính', 'value': 3},
+                      {'label': 'Phòng Hành chính', 'value': 4},
+                      {'label': 'Phòng Kỹ thuật', 'value': 5},
+                      {'label': 'Phòng Đảm bảo chất lượng', 'value': 6},
+                    ].map((item) {
+                      return PopupMenuItem<int>(
+                        value: item['value'] as int?,
+                        child: Text(item['label'] as String),
                       );
                     }).toList();
                   },
@@ -136,30 +146,42 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
               itemCount: filteredEmployees.length,
               itemBuilder: (BuildContext context, int index) {
+                final employee = filteredEmployees[index];
                 return Card(
                   child: ListTile(
-                    title: Text(filteredEmployees[index]['name']!),
-                    subtitle: Text(filteredEmployees[index]['position']!),
+                    title: Text(employee['name']!),
+                    subtitle: Text(employee['position']!),
                     leading: CircleAvatar(
-                      child: Text(
-                        filteredEmployees[index]['name']![0],
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.blue,
+                      backgroundImage: employee['url']!.isNotEmpty
+                          ? NetworkImage(employee['url']!)
+                          : NetworkImage('https://ui-avatars.com/api/?name=${employee['name']}&size=128'),
+                      onBackgroundImageError: (_, __) {
+                        WidgetsBinding.instance!.addPostFrameCallback((_) {
+                          setState(() {
+                            if (employee['url'] == employee['url']) {
+                              employee['url'] = '';
+                            }
+                          });
+                        });
+                      },
                     ),
+                    // Inside CompetencyProfilePage
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => CompetencyProfileDetailPage(
-                            employee: filteredEmployees[index],
+                            employeeId: int.parse(employee['id']!),
                           ),
                         ),
                       );
                     },
+
                   ),
                 );
               },
@@ -167,17 +189,21 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddCompetencyPage(),
-            ),
-          );
-        },
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     final result = await Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => AddCompetencyPage(),
+      //       ),
+      //     );
+      //
+      //     if (result == true) {
+      //       fetchEmployeesFromApi();
+      //     }
+      //   },
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 }

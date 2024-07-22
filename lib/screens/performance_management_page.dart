@@ -9,7 +9,7 @@ class PerformanceManagementPage extends StatelessWidget {
       'month': '8',
       'revenue': 5000,
       'rating': 4.5,
-      'goal': '10,000\$',
+      'goal': 10000,
       'detail': 'Chi tiết về hiệu suất của Nhân viên Nguyễn Văn A trong tháng 8.',
     },
     {
@@ -17,7 +17,7 @@ class PerformanceManagementPage extends StatelessWidget {
       'month': '7',
       'revenue': 7000,
       'rating': 4.2,
-      'goal': '12,000\$',
+      'goal': 12000,
       'detail': 'Chi tiết về hiệu suất của Nhân viên Trần Thị B trong tháng 7.',
     },
     {
@@ -25,7 +25,7 @@ class PerformanceManagementPage extends StatelessWidget {
       'month': '7',
       'revenue': 4000,
       'rating': 4.8,
-      'goal': '8,000\$',
+      'goal': 8000,
       'detail': 'Chi tiết về hiệu suất của Nhân viên Hoàng Đức C trong tháng 7.',
     },
     // Add more performance data as needed

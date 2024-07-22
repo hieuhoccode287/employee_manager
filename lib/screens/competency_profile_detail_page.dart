@@ -1,19 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:employee_manager/api/api_service.dart';
 import 'package:employee_manager/utils/constants.dart';
 
-class CompetencyProfileDetailPage extends StatelessWidget {
-  final Map<String, String> employee;
+class CompetencyProfileDetailPage extends StatefulWidget {
+  final int employeeId;
 
-  const CompetencyProfileDetailPage({required this.employee});
+  const CompetencyProfileDetailPage({required this.employeeId});
+
+  @override
+  _CompetencyProfileDetailPageState createState() => _CompetencyProfileDetailPageState();
+}
+
+class _CompetencyProfileDetailPageState extends State<CompetencyProfileDetailPage> {
+  Map<String, dynamic>? employee;
+  Map<String, dynamic>? competency;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEmployeeDetails();
+  }
+
+  void fetchEmployeeDetails() async {
+    try {
+      // Fetch basic employee details
+      final details = await ApiService.fetchEmployeeDetails(widget.employeeId);
+      setState(() {
+        employee = details;
+        // Fetch competency details using manl from the employee data
+        if (employee != null && employee!['manl'] != null) {
+          fetchCompetencyDetails(employee!['manl']);
+        } else {
+          isLoading = false;
+        }
+      });
+    } catch (e) {
+      print('Error fetching employee details: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void fetchCompetencyDetails(int manl) async {
+    try {
+      final details = await ApiService.fetchCompetencyById(manl);
+      setState(() {
+        competency = details;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching competency details: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          employee['name'] ?? 'Chi tiết Nhân viên',
+          employee?['tennv'] ?? 'Chi tiết Nhân viên',
           style: TextStyle(
-            color: Colors.white, // Text color of the title
+            color: Colors.white,
           ),
         ),
         backgroundColor: primaryColor,
@@ -21,7 +73,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'edit') {
-                _editEmployee(context);
+                _editEmployeeCompentency(context);
               } else if (value == 'delete') {
                 _deleteEmployee(context);
               }
@@ -35,7 +87,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                 ),
               ),
               const PopupMenuDivider(
-                height: 1, // Chiều cao của Divider
+                height: 1,
               ),
               const PopupMenuItem<String>(
                 value: 'delete',
@@ -47,9 +99,11 @@ class CompetencyProfileDetailPage extends StatelessWidget {
             ],
           ),
         ],
-        iconTheme: IconThemeData(color: Colors.white), // Color of the back button
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,10 +122,19 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.blue,
-                        child: Text(
-                          employee['name']![0],
-                          style: TextStyle(fontSize: 36, color: Colors.white),
-                        ),
+                        backgroundImage: employee?['avatar_url'] != null && employee?['avatar_url'].isNotEmpty
+                            ? NetworkImage('http://192.168.1.5:3000${employee!['avatar_url']}')
+                            : NetworkImage('https://ui-avatars.com/api/?name=${employee?['tennv']}&size=128'),
+                        onBackgroundImageError: (_, __) {
+                          WidgetsBinding.instance!.addPostFrameCallback((_) {
+                            setState(() {
+                              // Use placeholder image if the network image fails to load
+                              if (employee?['avatar_url'] != null) {
+                                employee!['avatar_url'] = '';
+                              }
+                            });
+                          });
+                        },
                       ),
                     ),
                     SizedBox(height: 16),
@@ -80,7 +143,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['name'] ?? 'Không rõ',
+                      employee?['tennv'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -89,7 +152,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['position'] ?? 'Không rõ',
+                      employee?['chucvu'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -98,7 +161,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['skills'] ?? 'Không rõ',
+                      competency?['kynang'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -107,7 +170,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['experience'] ?? 'Không rõ',
+                      competency?['kinhnghiem'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -116,7 +179,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['education'] ?? 'Không rõ',
+                      competency?['hocvan'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -125,7 +188,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['certifications'] ?? 'Không rõ',
+                      competency?['chungchi'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 12),
@@ -134,7 +197,7 @@ class CompetencyProfileDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      employee['projects'] ?? 'Không rõ',
+                      competency?['duan'] ?? 'Không rõ',
                       style: TextStyle(fontSize: 20),
                     ),
                   ],
@@ -147,15 +210,15 @@ class CompetencyProfileDetailPage extends StatelessWidget {
     );
   }
 
-  void _editEmployee(BuildContext context) {
-    // Xử lý khi người dùng chọn Sửa
+  void _editEmployeeCompentency(BuildContext context) {
+    // Implement edit functionality here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Chức năng Sửa đang được phát triển')),
     );
   }
 
   void _deleteEmployee(BuildContext context) {
-    // Xử lý khi người dùng chọn Xóa
+    // Implement delete functionality here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Chức năng Xóa đang được phát triển')),
     );

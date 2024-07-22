@@ -4,16 +4,8 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String _baseUrl = 'http://192.168.1.5:3000'; // IP address of your API server
-  static const String _loginEndpoint = '/login';
-  static const String _userInfoEndpoint = '/user_info';
-  static const String _employeesEndpoint = '/employees'; // Endpoint to fetch employees
-  static const String _addEmployeeEndpoint = '/employees/add'; // Endpoint to add employee
-  static const String _employeeDetailsEndpoint = '/employees/details'; // Endpoint to fetch employee details
-  static const String _updateEmployeeEndpoint = '/employees/update'; // Endpoint to update employee
-  static const String _deleteEmployeeEndpoint = '/employees'; // Endpoint to delete employee
-  static const String _uploadEndpoint = '/upload';
-  static const String _departmentsEndpoint = '/departments'; // Endpoint to fetch departments
 
+  static const String _loginEndpoint = '/login';
   static Future<Map<String, dynamic>> login(String email, String matkhau) async {
     final String url = '$_baseUrl$_loginEndpoint';
 
@@ -46,6 +38,7 @@ class ApiService {
     }
   }
 
+  static const String _userInfoEndpoint = '/user_info';
   static Future<String> fetchUserName(String email) async {
     final String url = '$_baseUrl$_userInfoEndpoint?email=$email';
 
@@ -64,6 +57,7 @@ class ApiService {
     }
   }
 
+  static const String _employeesEndpoint = '/employees'; // Endpoint to fetch employees
   static Future<List<dynamic>> fetchEmployees() async {
     final String url = '$_baseUrl$_employeesEndpoint';
 
@@ -82,6 +76,7 @@ class ApiService {
     }
   }
 
+  static const String _addEmployeeEndpoint = '/employees/add'; // Endpoint to add employee
   static Future<Map<String, dynamic>> addEmployee({
     required String tennv,
     required String chucvu,
@@ -119,6 +114,7 @@ class ApiService {
     }
   }
 
+  static const String _employeeDetailsEndpoint = '/employees/details'; // Endpoint to fetch employee details
   static Future<Map<String, dynamic>> fetchEmployeeDetails(int employeeId) async {
     final String url = '$_baseUrl$_employeeDetailsEndpoint/$employeeId';
 
@@ -137,8 +133,7 @@ class ApiService {
     }
   }
 
-
-
+  static const String _updateEmployeeEndpoint = '/employees/update'; // Endpoint to update employee
   static Future<Map<String, dynamic>> updateEmployee(Map<String, dynamic> updatedEmployee) async {
     final int employeeId = updatedEmployee['id'];
     final String url = '$_baseUrl$_updateEmployeeEndpoint/$employeeId';
@@ -162,8 +157,7 @@ class ApiService {
     }
   }
 
-
-
+  static const String _deleteEmployeeEndpoint = '/employees'; // Endpoint to delete employee
   static Future<Map<String, dynamic>> deleteEmployee(int employeeId) async {
     final String url = '$_baseUrl$_deleteEmployeeEndpoint/$employeeId';
     try {
@@ -187,6 +181,7 @@ class ApiService {
     }
   }
 
+  static const String _uploadEndpoint = '/upload';
   static Future<String> uploadImage(File imageFile) async {
     try {
       final String url = '$_baseUrl$_uploadEndpoint';
@@ -214,7 +209,7 @@ class ApiService {
     return '$_baseUrl$filename';
   }
 
-
+  static const String _departmentsEndpoint = '/departments'; // Endpoint to fetch departments
   static Future<List<Map<String, dynamic>>> fetchDepartments() async {
     final String url = '$_baseUrl$_departmentsEndpoint';
 
@@ -233,6 +228,25 @@ class ApiService {
     } catch (e) {
       print('Error: $e');
       throw Exception('Failed to load departments');
+    }
+  }
+
+  static const String _competencyEndpoint = '/competencies'; // Endpoint to fetch competency
+  static Future<Map<String, dynamic>> fetchCompetencyById(int manl) async {
+    final String url = '$_baseUrl$_competencyEndpoint/$manl';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to load competency');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to load competency');
     }
   }
 }

@@ -67,16 +67,16 @@ class PerformanceDetailPage extends StatelessWidget {
               iconColor: Colors.green,
             ),
             _buildInfoRow(
+              title: 'Mục tiêu:',
+              value: '${data['goal']} \$',
+              icon: Icons.flag,
+              iconColor: Colors.red,
+            ),
+            _buildInfoRow(
               title: 'Đánh giá:',
               value: '${data['rating']}',
               icon: Icons.star,
               iconColor: Colors.orange,
-            ),
-            _buildInfoRow(
-              title: 'Mục tiêu:',
-              value: data['goal'],
-              icon: Icons.flag,
-              iconColor: Colors.red,
             ),
             _buildInfoRow(
               title: 'Chi tiết:',

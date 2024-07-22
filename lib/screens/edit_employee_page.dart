@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -102,7 +101,6 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
       decoration: InputDecoration(
         labelText: 'Phòng ban',
         prefixIcon: Icon(Icons.business),
-        border: OutlineInputBorder(),
       ),
       items: _departments.map((dept) => DropdownMenuItem<int>(
         value: dept['mapb'],
@@ -230,7 +228,8 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chỉnh sửa nhân viên',
+        title: Text(
+          'Chỉnh sửa nhân viên',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: primaryColor,
@@ -247,7 +246,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               SizedBox(height: 16.0),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Tên nhân viên'),
+                decoration: InputDecoration(
+                  labelText: 'Tên nhân viên',
+                  prefixIcon: Icon(Icons.person),
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Vui lòng nhập tên nhân viên';
@@ -258,7 +260,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               SizedBox(height: 12),
               TextFormField(
                 controller: _positionController,
-                decoration: InputDecoration(labelText: 'Chức vụ'),
+                decoration: InputDecoration(
+                  labelText: 'Chức vụ',
+                  prefixIcon: Icon(Icons.work),
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Vui lòng nhập chức vụ';
@@ -271,7 +276,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Vui lòng nhập email';
@@ -285,7 +293,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               SizedBox(height: 12),
               TextFormField(
                 controller: _phoneController,
-                decoration: InputDecoration(labelText: 'Điện thoại'),
+                decoration: InputDecoration(
+                  labelText: 'Điện thoại',
+                  prefixIcon: Icon(Icons.phone),
+                ),
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -297,16 +308,23 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(labelText: 'Địa chỉ'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Vui lòng nhập địa chỉ';
-                  }
-                  return null;
-                },
+              SizedBox(height: 5),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: TextFormField(
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    labelText: 'Địa chỉ',
+                    prefixIcon: Icon(Icons.home),
+                  ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Vui lòng nhập địa chỉ';
+                    }
+                    return null;
+                  },
+                ),
               ),
               SizedBox(height: 20),
               Center(
