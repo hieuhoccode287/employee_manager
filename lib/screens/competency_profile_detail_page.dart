@@ -109,7 +109,7 @@ class _CompetencyProfileDetailPageState extends State<CompetencyProfileDetailPag
                         backgroundColor: Colors.blue,
                         backgroundImage: employee?['avatar_url'] != null &&
                             employee!['avatar_url'].isNotEmpty
-                            ? NetworkImage('http://192.168.1.5:3000${employee!['avatar_url']}')
+                            ? NetworkImage(ApiService.getImageUrl(employee?['avatar_url']))
                             : NetworkImage('https://ui-avatars.com/api/?name=${employee?['tennv']}&size=128'),
                         onBackgroundImageError: (_, __) {
                           WidgetsBinding.instance!.addPostFrameCallback((_) {

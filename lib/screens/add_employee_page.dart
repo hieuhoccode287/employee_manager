@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:employee_manager/utils/constants.dart';
 import 'package:employee_manager/api/api_service.dart';
-import 'dart:math';
 
 class AddEmployeePage extends StatefulWidget {
   @override
@@ -17,8 +16,15 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  String _selectedDepartment = 'Nhân sự'; // Default department
-  File? _image; // Variable to hold selected image file
+  List<Map<String, dynamic>> _departments = [];
+  int? _selectedDepartmentId;
+  File? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDepartments();
+  }
 
   @override
   void dispose() {
@@ -28,6 +34,25 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     _phoneController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  Future<void> fetchDepartments() async {
+    try {
+      List<Map<String, dynamic>> departments = await ApiService.fetchDepartments();
+      setState(() {
+        _departments = departments;
+        if (_departments.isNotEmpty) {
+          _selectedDepartmentId = _departments.first['mapb'];
+        }
+      });
+    } catch (e) {
+      print('Error fetching departments: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Có lỗi xảy ra khi tải danh sách phòng ban'),
+        ),
+      );
+    }
   }
 
   @override
@@ -52,44 +77,58 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             children: [
               _buildProfileImage(),
               SizedBox(height: 20.0),
-              _buildTextField('Họ và tên', _nameController, Icons.person,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập họ và tên';
-                    }
-                    if (value.length < 2) {
-                      return 'Họ và tên phải có ít nhất 2 kí tự';
-                    }
-                    return null;
-                  }),
+              _buildTextField('Họ và tên', _nameController, Icons.person, validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập họ và tên';
+                }
+                if (value.length < 2) {
+                  return 'Họ và tên phải có ít nhất 2 kí tự';
+                }
+                return null;
+              }),
               SizedBox(height: 16.0),
-              _buildTextField('Chức vụ', _positionController, Icons.work),
+              _buildTextField('Chức vụ', _positionController, Icons.work, validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập chức vụ';
+                }
+                if (value.length < 2) {
+                  return 'Chức vụ phải có ít nhất 2 kí tự';
+                }
+                return null;
+              }),
               SizedBox(height: 16.0),
               _buildDepartmentDropdown(),
               SizedBox(height: 16.0),
-              _buildTextField('Email', _emailController, Icons.email, keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập email';
-                    }
-                    if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
-                      return 'Email không hợp lệ';
-                    }
-                    return null;
-                  }),
+              _buildTextField('Email', _emailController, Icons.email, keyboardType: TextInputType.emailAddress, validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập email';
+                }
+                if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+                  return 'Email không hợp lệ';
+                }
+                return null;
+              }),
               SizedBox(height: 16.0),
-              _buildTextField('Số điện thoại', _phoneController, Icons.phone, keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập số điện thoại';
-                    }
-                    if (!RegExp(r'^\d{10,11}$').hasMatch(value)) {
-                      return 'Số điện thoại phải có 10 hoặc 11 chữ số';
-                    }
-                    return null;
-                  }),
+              _buildTextField('Số điện thoại', _phoneController, Icons.phone, keyboardType: TextInputType.phone, validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập số điện thoại';
+                }
+                if (!RegExp(r'^\d{10,11}$').hasMatch(value)) {
+                  return 'Số điện thoại phải có 10 hoặc 11 chữ số';
+                }
+                return null;
+              }),
               SizedBox(height: 16.0),
-              _buildTextField('Địa chỉ', _addressController, Icons.home, maxLines: 3),
+              _buildTextField('Địa chỉ', _addressController, Icons.home, maxLines: 3, validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập địa chỉ';
+                }
+                // Optionally add more constraints for address length
+                if (value.length < 5) {
+                  return 'Địa chỉ phải có ít nhất 5 kí tự';
+                }
+                return null;
+              }),
               SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () {
@@ -172,26 +211,24 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   }
 
   Widget _buildDepartmentDropdown() {
-    return DropdownButtonFormField<String>(
-      value: _selectedDepartment,
+    return DropdownButtonFormField<int>(
+      value: _selectedDepartmentId,
       decoration: InputDecoration(
         labelText: 'Phòng ban',
         prefixIcon: Icon(Icons.business),
         border: OutlineInputBorder(),
       ),
-      items: ['Nhân sự', 'Marketing', 'Kế toán - Tài chính', 'Hành chính','Kỹ thuật', 'Đảm bảo chất lượng']
-          .map((dept) => DropdownMenuItem<String>(
-        value: dept,
-        child: Text(dept),
-      ))
-          .toList(),
+      items: _departments.map((dept) => DropdownMenuItem<int>(
+        value: dept['mapb'],
+        child: Text(dept['tenpb']),
+      )).toList(),
       onChanged: (value) {
         setState(() {
-          _selectedDepartment = value!;
+          _selectedDepartmentId = value!;
         });
       },
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        if (value == null || value == 0) {
           return 'Vui lòng chọn phòng ban';
         }
         return null;
@@ -224,7 +261,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       final result = await ApiService.addEmployee(
         tennv: _nameController.text.trim(),
         chucvu: _positionController.text.trim(),
-        mapb: _getDepartmentId(_selectedDepartment),
+        mapb: _selectedDepartmentId!,
         email: _emailController.text.trim(),
         sdt: parsedPhoneNumber,
         diachi: _addressController.text.trim(),
@@ -255,49 +292,22 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Đã xảy ra lỗi khi thêm nhân viên')),
+          SnackBar(content: Text(result['message'] ?? 'Đã xảy ra lỗi')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã xảy ra lỗi khi thêm nhân viên')),
       );
-      print('Error adding employee: $e');
     }
   }
 
-
-  int _getDepartmentId(String departmentName) {
-    switch (departmentName) {
-      case 'Nhân sự':
-        return 1;
-      case 'Marketing':
-        return 2;
-      case 'Kế toán - Tài chính':
-        return 3;
-      case 'Hành chính':
-        return 4;
-      case 'Kỹ thuật':
-        return 5;
-      case 'Đảm bảo chất lượng':
-        return 6;
-      default:
-        return 1;
-    }
-  }
-
-  void _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
-
-      print('Image path: ${pickedFile.path}');
-    } else {
-      print('No image selected.');
     }
   }
 }

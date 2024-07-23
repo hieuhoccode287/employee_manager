@@ -31,7 +31,7 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
       setState(() {
         _originalEmployees = employees.map((employee) {
           String avatarUrl = employee['avatar_url'] != null && employee['avatar_url'].isNotEmpty
-              ? 'http://192.168.1.5:3000${employee['avatar_url']}'
+              ? ApiService.getImageUrl(employee['avatar_url'])
               : '';
           return {
             'id': employee['manv'] != null ? employee['manv'].toString() : '',

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = 'http://192.168.1.5:3000'; // IP address of your API server
+  static const String _baseUrl = 'http://192.168.1.2:3000'; // IP address of your API server
 
   static const String _loginEndpoint = '/login';
   static Future<Map<String, dynamic>> login(String email, String matkhau) async {
