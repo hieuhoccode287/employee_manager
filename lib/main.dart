@@ -1,6 +1,5 @@
 import 'package:employee_manager/guest/onboarding_page.dart';
 import 'package:flutter/material.dart';
-import 'guest/login_page.dart';
 
 void main() => runApp(const MyApp());
 

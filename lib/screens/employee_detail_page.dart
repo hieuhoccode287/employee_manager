@@ -42,16 +42,20 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
         for (var dept in departmentList) dept['mapb']: dept['tenpb']
       };
 
-      setState(() {
-        employee = employeeData;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          employee = employeeData;
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-        hasError = true;
-        errorMessage = 'Không thể tải thông tin nhân viên.';
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+          errorMessage = 'Không thể tải thông tin nhân viên.';
+        });
+      }
     }
   }
 
@@ -233,7 +237,9 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
 
     if (result != null && result as bool) {
       // Gọi lại hàm _fetchEmployeeDetails để làm mới thông tin nhân viên
-      _fetchData();
+      if (mounted) {
+        _fetchData();
+      }
       widget.onEdit();
     }
   }
@@ -304,7 +310,9 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
         widget.onDelete();
 
         // Navigate back to the previous page or perform any necessary updates
-        Navigator.of(context).pop(); // Close the EmployeeDetailPage
+        if (mounted) {
+          Navigator.of(context).pop(); // Close the EmployeeDetailPage
+        }
       } else {
         throw Exception('Không thể xóa nhân viên');
       }
@@ -315,7 +323,4 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
       );
     }
   }
-
-
-
 }
