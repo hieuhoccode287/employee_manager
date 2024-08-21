@@ -11,6 +11,7 @@ class CompetencyProfilePage extends StatefulWidget {
 class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
   List<Map<String, String>> filteredEmployees = [];
   List<Map<String, String>> _originalEmployees = [];
+  List<Map<String, dynamic>> _departments = []; // List to store departments
   String searchQuery = '';
   int? selectedDepartment;
   bool isLoading = false;
@@ -19,6 +20,7 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
   void initState() {
     super.initState();
     fetchEmployeesFromApi();
+    fetchDepartmentsFromApi(); // Fetch departments when initializing
   }
 
   void fetchEmployeesFromApi() async {
@@ -59,6 +61,23 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
     }
   }
 
+  void fetchDepartmentsFromApi() async {
+    try {
+      List<dynamic> departments = await ApiService.fetchDepartments();
+      setState(() {
+        _departments = departments.map((dept) {
+          return {
+            'label': dept['tenpb'],
+            'value': dept['mapb'],
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print('Error fetching departments: $e');
+      // Handle error (e.g., show error message)
+    }
+  }
+
   void updateSearchQuery(String newQuery) {
     setState(() {
       searchQuery = newQuery;
@@ -80,7 +99,6 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
             .toLowerCase()
             .contains(searchQuery.toLowerCase());
 
-        // Check if selectedDepartmentMapb is null or matches the employee's department
         final matchesDepartment = selectedDepartment == null ||
             selectedDepartment == 0 || // Handle case when "Tất cả" is selected
             employee['iddepartment'] == selectedDepartment.toString();
@@ -128,12 +146,7 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
                   itemBuilder: (BuildContext context) {
                     return [
                       {'label': 'Tất cả', 'value': 0},
-                      {'label': 'Phòng Nhân sự', 'value': 1},
-                      {'label': 'Phòng Marketing', 'value': 2},
-                      {'label': 'Phòng Kế toán - Tài chính', 'value': 3},
-                      {'label': 'Phòng Hành chính', 'value': 4},
-                      {'label': 'Phòng Kỹ thuật', 'value': 5},
-                      {'label': 'Phòng Đảm bảo chất lượng', 'value': 6},
+                      ..._departments, // Add dynamic departments here
                     ].map((item) {
                       return PopupMenuItem<int>(
                         value: item['value'] as int?,
@@ -170,7 +183,6 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
                         });
                       },
                     ),
-                    // Inside CompetencyProfilePage
                     onTap: () {
                       Navigator.push(
                         context,
@@ -181,7 +193,6 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
                         ),
                       );
                     },
-
                   ),
                 );
               },
@@ -189,6 +200,7 @@ class _CompetencyProfilePageState extends State<CompetencyProfilePage> {
           ),
         ],
       ),
+      // Uncomment if you want to add an action button
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () async {
       //     final result = await Navigator.push(

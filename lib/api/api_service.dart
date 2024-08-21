@@ -361,4 +361,88 @@ class ApiService {
     }
   }
 
+  // Add a department
+  static const String _addDepartmentEndpoint = '/departments/add'; // Endpoint to add department
+  static Future<Map<String, dynamic>> addDepartment(String tenpb) async {
+    final String url = '$_baseUrl$_addDepartmentEndpoint';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'tenpb': tenpb}),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        return responseData as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to add department: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to add department');
+    }
+  }
+
+  // Edit a department
+  static const String _editDepartmentEndpoint = '/departments/update'; // Endpoint to edit department
+  static Future<Map<String, dynamic>> editDepartment({
+    required int id,
+    required String tenpb,
+  }) async {
+    final String url = '$_baseUrl$_editDepartmentEndpoint/$id';
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'tenpb': tenpb}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to edit department: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to edit department');
+    }
+  }
+
+  // Delete a department
+  static const String _deleteDepartmentEndpoint = '/departments'; // Endpoint to delete department
+  static Future<Map<String, dynamic>> deleteDepartment(int departmentId) async {
+    final String url = '$_baseUrl$_deleteDepartmentEndpoint/$departmentId';
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'],
+          };
+        } else {
+          throw Exception(responseData['message'] ?? 'Failed to delete department');
+        }
+      } else {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+        throw Exception(responseData['message'] ?? 'Failed to delete department');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to delete department');
+    }
+  }
+
+
+
 }

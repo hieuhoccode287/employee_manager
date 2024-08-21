@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:employee_manager/utils/constants.dart';
-import 'package:employee_manager/screens/performance_management_page.dart'; // Import PerformanceManagementPage
+import 'package:employee_manager/screens/performance_management_page.dart';
 import 'package:employee_manager/api/api_service.dart';
 import 'competency_profile_page.dart';
+import 'department_management_page.dart'; // Import DepartmentManagementPage
 
 class HomePage extends StatefulWidget {
   final String email;
@@ -30,7 +31,6 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       print('Failed to fetch user name: $e');
-      // Handle the error appropriately, possibly show an error message
     }
   }
 
@@ -100,6 +100,19 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CompetencyProfilePage(),
+                ),
+              );
+            },
+          ),
+          _buildSmallCard(
+            icon: Icons.business,
+            title: 'Quản lý phòng ban',
+            color: Colors.green,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DepartmentManagementPage(),
                 ),
               );
             },
